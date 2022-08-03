@@ -1,0 +1,27 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Upload to blob storage
+      uses: Azure/cli@1.0.4
+      with:
+        inlineScript: |
+            az storage blob upload-batch --account-name newstorageacct22 --destination '$web' --source frontend
+    - name: Purge CDN endpoint
+      uses: Azure/cli@1.0.4
+      with:
+        inlineScript: |
+           az cdn endpoint purge --content-paths  "/*" --profile-name mywebcdnprofile --name newCDNendpoint1 --resource-group newfolder --no-wait
